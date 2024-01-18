@@ -1,0 +1,4 @@
+*.pyc
+__pycache__/
+.idea/
+configs/yaml_configs/weather_resources.yaml

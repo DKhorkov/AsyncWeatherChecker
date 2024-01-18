@@ -1,0 +1,9 @@
+weather_resources:
+  - {
+      name: 'Some API name, which provides weather info',
+      url: 'https://some-weather.com/',
+      params: {
+        token: 'Your token for purpose of getting data from API'
+      },
+      weather_attr: 'weather_result_attr key of JSON, received from API as a response'
+  }
