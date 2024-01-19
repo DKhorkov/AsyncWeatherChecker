@@ -7,3 +7,60 @@ weather_resources:
       },
       weather_attr: 'weather_result_attr key of JSON, received from API as a response'
   }
+  - {
+      name: 'OpenWeatherAPI',
+      url: 'https://api.openweathermap.org/data/2.5/weather',
+      params: {
+        latitude: '59.9386300',
+        longitude: '30.31413001',
+        appid: 'YOUR TOKEN HERE',
+        units: 'metric'
+      },
+      headers: {},
+      weather_attrs: [
+        'main',
+        'temp'
+      ]
+  }
+  - {
+    name: 'YandexWeather',
+    url: 'https://api.weather.yandex.ru/v2/forecast',
+    params: {
+      latitude: '59.9386300',
+      longitude: '30.31413001'
+    },
+    headers: {
+      X-Yandex-API-Key: 'YOUR TOKEN HERE'
+    },
+    weather_attrs: [
+      'fact',
+      'temp'
+    ]
+  }
+  - {
+    name: 'WeatherStack',
+    url: 'http://api.weatherstack.com/current',
+    params: {
+      query: 'Saint-Petersburg',
+      access_key: 'YOUR TOKEN HERE'
+    },
+    headers: {},
+    weather_attrs: [
+      'current',
+      'temperature'
+    ]
+  }
+  - {
+    name: 'OpenMeteo',
+    url: 'https://api.open-meteo.com/v1/forecast',
+    params: {
+      latitude: '59.9386300',
+      longitude: '30.31413001',
+      current: 'temperature_2m'
+    },
+    headers: {},
+    weather_attrs: [
+      'current',
+      'temperature_2m'
+    ]
+  }

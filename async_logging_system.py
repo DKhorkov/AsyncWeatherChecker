@@ -9,7 +9,7 @@ __file_handler: AsyncFileHandler = AsyncFileHandler(filename=__log_file.name)
 
 logger: Logger = Logger.with_default_handlers(
     name='async_logger',
-    level=aiologger.logger.LogLevel.DEBUG,
-    handlers=[__file_handler]
+    level=aiologger.logger.LogLevel.DEBUG
 )
+logger.add_handler(__file_handler)
 

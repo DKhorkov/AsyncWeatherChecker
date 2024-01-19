@@ -1,13 +1,24 @@
 import yaml
 
-from yaml_configs import CustomizedSettingsData, yaml_config
+from typing import List
+
+from .yaml_configs import CustomizedSettings, WeatherResource, yaml_config
 
 
 class YamlHandler:
 
     @staticmethod
-    def read_customized_settings_yaml() -> CustomizedSettingsData:
-        with open(yaml_config.customized_settings_yaml_name, yaml_config.yaml_file_name) as yaml_file:
-            raw_customized_settings_data = yaml.safe_load(yaml_file)
+    def read_customized_settings_yaml() -> CustomizedSettings:
+        with open(yaml_config.customized_settings_yaml_path, yaml_config.yaml_file_mode) as yaml_file:
+            yaml_data = yaml.safe_load(yaml_file)
 
-        return CustomizedSettingsData(**raw_customized_settings_data)
+        return CustomizedSettings(**yaml_data)
+
+    @staticmethod
+    def read_weather_resources_yaml() -> List[WeatherResource]:
+        with open(yaml_config.weather_resources_yaml_path, yaml_config.yaml_file_mode) as yaml_file:
+            yaml_data = yaml.safe_load(yaml_file)
+
+        return [
+            WeatherResource(**weather_resource) for weather_resource in yaml_data[yaml_config.weather_resources_key]
+        ]
