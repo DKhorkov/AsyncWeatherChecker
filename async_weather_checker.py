@@ -22,30 +22,35 @@ class AsyncWeatherChecker:
     async def __check_weather_cycle(self) -> None:
         await self.__delete_last_session_results()
         await self.__write_headers_to_file()
-        while self.__config.iteration_start_point < self.__config.customized_settings.times_to_check:
+
+        iter_start_point: int = self.__config.iteration_start_point
+        while iter_start_point < self.__config.customized_settings.times_to_check:
             await self.__check_weather()
+            iter_start_point += self.__config.increment_value
             await asyncio.sleep(self.__config.customized_settings.check_interval_in_seconds)
 
     async def __delete_last_session_results(self) -> None:
         try:
             os.remove(self.__config.results_file_path)
         except FileNotFoundError as e:
-            self.__logger.exception(
-                f'Could not delete last session results file.\n'
-                f'Error: {e}'
+            await self.__logger.error(
+                msg=f'Could not delete last session results file.\n'
+                    f'Error: {e}',
+                exc_info=True
             )
 
     async def __write_headers_to_file(self) -> None:
         async with aiofiles.open(
-                file=self.__config.results_file_path,
-                mode=self.__config.results_file_mode
+            file=self.__config.results_file_path,
+            mode=self.__config.results_file_mode
         ) as file:
 
             # Sorting list for purposes of writing weather results in the same order later
             headers: List[str] = sorted(
                 [weather_resource.name for weather_resource in self.__config.weather_resources]
             )
-            await file.write(self.__config.sep.join(headers))
+            headers += self.__config.base_headers
+            await file.write(self.__config.sep.join(headers) + self.__config.new_line_arg)
 
     async def __check_weather(self) -> None:
         tasks: List = []
@@ -65,7 +70,7 @@ class AsyncWeatherChecker:
                     headers=weather_resource.headers
                 ) as response:
 
-                    response_json = await response.json()
+                    response_json = await response.json(content_type=None)
 
         except Exception as e:
             await self.__logger.error(
@@ -86,7 +91,7 @@ class AsyncWeatherChecker:
     async def __sort_weather_results(weather_results: Tuple[WeatherResult]) -> List[WeatherResult]:
         united_weather_results = {}
         for result in weather_results:
-            weather_resource_name, temperature = result.items()
+            weather_resource_name, temperature = list(result.items())[0]
             united_weather_results[weather_resource_name] = temperature
 
         sorted_weather_results: List[WeatherResult] = [
@@ -97,31 +102,36 @@ class AsyncWeatherChecker:
 
         return sorted_weather_results
 
-    @staticmethod
-    async def __get_weather_from_response(response_json: Dict, weather_attrs: List[AnyStr]) -> Temperature:
+    async def __get_weather_from_response(self, response_json: Dict, weather_attrs: List[AnyStr]) -> Temperature:
         result = None
         for attr in weather_attrs:
-            result: Any = response_json.get(attr, None)
+            weather_info: Dict = result if result else response_json
+            result: Any = weather_info.get(attr, None)
 
-        return Temperature(result) if result else Temperature()
+        return Temperature(result) if result else Temperature(self.__config.default_temperature)
 
     async def __write_weather_results_to_file(self, weather_results: List[WeatherResult]) -> None:
         temperatures: List[Temperature] = [list(weather_result.values())[0] for weather_result in weather_results]
-        average_temp: Temperature = await self.__calculate_average_temp(weather_results=weather_results)
-        temperatures_to_write: List[str] = [str(temperature) for temperature in temperatures + [average_temp]]
+        average_temperature: Temperature = await self.__calculate_average_temperature(temperatures=temperatures)
+        temperatures_to_write: List[str] = [str(temperature) for temperature in temperatures + [average_temperature]]
 
         async with aiofiles.open(
-                file=self.__config.results_file_path,
-                mode=self.__config.results_file_mode
+            file=self.__config.results_file_path,
+            mode=self.__config.results_file_mode
         ) as file:
 
-            await file.write(self.__config.sep.join(temperatures_to_write))
+            await file.write(self.__config.sep.join(temperatures_to_write)  + self.__config.new_line_arg)
 
-    @staticmethod
-    async def __calculate_average_temp(weather_results: List[WeatherResult]) -> Temperature:
-        temp_sum: float = 0
-        for weather_result in weather_results:
-            temp_sum += list(weather_result.values())[0]
+    async def __calculate_average_temperature(self, temperatures: List[Temperature]) -> Temperature:
+        temperature_sum: float = 0
+        results_counter: int = self.__config.default_counter_value
+        for temperature in temperatures:
+            if temperature != self.__config.default_temperature:
+                temperature_sum += temperature
+                results_counter += self.__config.increment_value
 
-        average_temp: float = temp_sum / len(weather_results)
-        return Temperature(average_temp)
+        if results_counter == self.__config.default_counter_value:
+            results_counter = self.__config.increment_value
+
+        average_temperature: float = temperature_sum / results_counter
+        return Temperature(average_temperature)

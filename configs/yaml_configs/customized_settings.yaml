@@ -1,2 +1,2 @@
-check_interval_in_seconds: 60
+check_interval_in_seconds: 5
 times_to_check: 10
