@@ -17,10 +17,20 @@ class AsyncWeatherChecker:
         self.__config: Config = config
 
     def run(self) -> None:
+        """
+        Startpoint function, which runs weather checker in event loop of asyncio.
+        """
         asyncio.run(self.__check_weather_cycle())
 
     async def __check_weather_cycle(self) -> None:
-        await self.__delete_last_session_results()
+        """
+        Core logics function of Weather Checker.
+        After cleaning last launch data and creating necessary data for current launch, function starts
+        iteration cycle of getting weather a number of times, defined by user in according config file.
+        After getting and processing received weather, sleeps for a period, also defined by user in according
+        config file.
+        """
+        await self.__delete_last_launch_results()
         await self.__write_headers_to_file()
 
         iter_start_point: int = self.__config.iteration_start_point
@@ -29,7 +39,10 @@ class AsyncWeatherChecker:
             iter_start_point += self.__config.increment_value
             await asyncio.sleep(self.__config.customized_settings.check_interval_in_seconds)
 
-    async def __delete_last_session_results(self) -> None:
+    async def __delete_last_launch_results(self) -> None:
+        """
+        Deletes last launch results file (.csv) if it exists.
+        """
         try:
             os.remove(self.__config.results_file_path)
         except FileNotFoundError as e:
@@ -40,12 +53,17 @@ class AsyncWeatherChecker:
             )
 
     async def __write_headers_to_file(self) -> None:
+        """
+        Creates headers for results file (in .csv format) and writes it to a new results file.
+        Headers is a list of sorted weather resources (APIs) names.
+        Purpose of sorting headers is to write results in future in the same order as the according weather resource
+        name was written.
+        """
         async with aiofiles.open(
             file=self.__config.results_file_path,
             mode=self.__config.results_file_mode
         ) as file:
 
-            # Sorting list for purposes of writing weather results in the same order later
             headers: List[str] = sorted(
                 [weather_resource.name for weather_resource in self.__config.weather_resources]
             )
@@ -89,6 +107,15 @@ class AsyncWeatherChecker:
 
     @staticmethod
     async def __sort_weather_results(weather_results: Tuple[WeatherResult]) -> List[WeatherResult]:
+        """
+        Sorts weather results by name of weather resource (API), from which the result was received for purpose of
+        writing results in the same order, as headers with weather resources names were written to the result file.
+
+        :param weather_results: Tuple of :py:class:`WeatherResult` objects, received from asyncio.gather() method.
+        :return: List of sorted :py:class:`WeatherResult` objects.
+        """
+
+        # Processes every WeatherResult from received tuple and unites in to single dictionary for sorting next:
         united_weather_results = {}
         for result in weather_results:
             weather_resource_name, temperature = list(result.items())[0]
@@ -103,6 +130,14 @@ class AsyncWeatherChecker:
         return sorted_weather_results
 
     async def __get_weather_from_response(self, response_json: Dict, weather_attrs: List[AnyStr]) -> Temperature:
+        """
+        Dynamically parses response in JSON format from weather API and getting data from it by keys,
+        which were provided by user in according configuration file.
+
+        :param response_json: A JSON object with weather data from according API.
+        :param weather_attrs: List of sorted keys for getting temperature from @response_json param.
+        :return: :py:class:`Temperature`
+        """
         result = None
         for attr in weather_attrs:
             weather_info: Dict = result if result else response_json
@@ -120,9 +155,15 @@ class AsyncWeatherChecker:
             mode=self.__config.results_file_mode
         ) as file:
 
-            await file.write(self.__config.sep.join(temperatures_to_write)  + self.__config.new_line_arg)
+            await file.write(self.__config.sep.join(temperatures_to_write) + self.__config.new_line_arg)
 
     async def __calculate_average_temperature(self, temperatures: List[Temperature]) -> Temperature:
+        """
+        Calculate the average temperature based on all weather results from different weather resources.
+
+        :param temperatures: List of :py:class:`Temperature` objects.
+        :return: :py:class:`Temperature`
+        """
         temperature_sum: float = 0
         results_counter: int = self.__config.default_counter_value
         for temperature in temperatures:
@@ -130,6 +171,7 @@ class AsyncWeatherChecker:
                 temperature_sum += temperature
                 results_counter += self.__config.increment_value
 
+        # Avoiding ZeroDivisionError:
         if results_counter == self.__config.default_counter_value:
             results_counter = self.__config.increment_value
 
