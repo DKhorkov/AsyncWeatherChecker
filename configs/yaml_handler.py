@@ -14,6 +14,7 @@ class YamlHandler:
 
         :return: :py:class:`CustomizedSettings` object.
         """
+
         with open(yaml_config.customized_settings_yaml_path, yaml_config.yaml_file_mode) as yaml_file:
             yaml_data = yaml.safe_load(yaml_file)
 
@@ -26,6 +27,7 @@ class YamlHandler:
 
         :return: List of :py:class:`WeatherResource` objects.
         """
+
         with open(yaml_config.weather_resources_yaml_path, yaml_config.yaml_file_mode) as yaml_file:
             yaml_data = yaml.safe_load(yaml_file)
 
