@@ -1,0 +1,15 @@
+weather_resources:
+  - {
+    name: 'OpenMeteo',
+    url: 'https://api.open-meteo.com/v1/forecast',
+    params: {
+      latitude: '59.9386300',
+      longitude: '30.31413001',
+      current: 'temperature_2m'
+    },
+    headers: {},
+    result_keys: [
+      'current',
+      'temperature_2m'
+    ]
+  }

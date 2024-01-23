@@ -8,7 +8,7 @@ weather_resources:
       headers: {
         some_header_key: 'header value. For example, token for access to API'
       },
-      weather_attrs: [
+      result_keys: [
         'Result keys of JSON, received from API as a response. Should be in sorted order.'
       ]
   }
@@ -22,7 +22,7 @@ weather_resources:
         units: 'metric'
       },
       headers: {},
-      weather_attrs: [
+      result_keys: [
         'main',
         'temp'
       ]
@@ -37,7 +37,7 @@ weather_resources:
     headers: {
       X-Yandex-API-Key: 'YOUR TOKEN HERE'
     },
-    weather_attrs: [
+    result_keys: [
       'fact',
       'temp'
     ]
@@ -50,7 +50,7 @@ weather_resources:
       access_key: 'YOUR TOKEN HERE'
     },
     headers: {},
-    weather_attrs: [
+    result_keys: [
       'current',
       'temperature'
     ]
@@ -64,7 +64,7 @@ weather_resources:
       current: 'temperature_2m'
     },
     headers: {},
-    weather_attrs: [
+    result_keys: [
       'current',
       'temperature_2m'
     ]

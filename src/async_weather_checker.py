@@ -126,7 +126,7 @@ class AsyncWeatherChecker:
         finally:
             temperature: Temperature = await self.__get_weather_from_response(
                 response_json=response_json,
-                weather_attrs=weather_resource.weather_attrs
+                result_keys=weather_resource.result_keys
             )
 
             return WeatherResult({weather_resource.name: temperature})
@@ -158,7 +158,7 @@ class AsyncWeatherChecker:
     async def __get_weather_from_response(
             self,
             response_json: Optional[Dict],
-            weather_attrs: List[AnyStr]
+            result_keys: List[AnyStr]
     ) -> Temperature:
         """
         if response in JSON format from weather API was  NOT received, returns :py:class:`Temperature`
@@ -168,7 +168,7 @@ class AsyncWeatherChecker:
         which were provided by user in according configuration file.
 
         :param response_json: A JSON object with weather data from according API.
-        :param weather_attrs: List of sorted keys for getting temperature from @response_json param.
+        :param result_keys: List of sorted keys for getting temperature from @response_json param.
         :return: :py:class:`Temperature`
         """
 
@@ -176,9 +176,9 @@ class AsyncWeatherChecker:
             return Temperature(self.__config.default_temperature)
 
         result = None
-        for attr in weather_attrs:
+        for key in result_keys:
             weather_info: Dict = result if result else response_json
-            result: Any = weather_info.get(attr, None)
+            result: Any = weather_info.get(key, None)
 
         return Temperature(result) if result else Temperature(self.__config.default_temperature)
 
