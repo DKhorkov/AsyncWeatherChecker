@@ -1,15 +1,18 @@
 from typing import List
 
 from src.configs.config import WeatherResource, CustomizedSettings
-from .config import test_config
+from .config import mock_data_config
 
 
 class MockData:
+    """
+    Class, representing mocked data for testing, which will be compared to results of tested classes and methods.
+    """
 
     def __init__(self) -> None:
         self.__customized_settings = CustomizedSettings(
-            times_to_check=test_config.times_to_check_weather,
-            check_interval_in_seconds=test_config.check_weather_interval_in_seconds
+            times_to_check=mock_data_config.times_to_check_weather,
+            check_interval_in_seconds=mock_data_config.check_weather_interval_in_seconds
         )
 
         # Params below should be equal to provided in "tests/configs/yaml_configs/weather_resources.yaml" file:

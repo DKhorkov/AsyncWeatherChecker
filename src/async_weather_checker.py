@@ -5,14 +5,18 @@ import os
 
 from typing import List, Dict, AnyStr, Tuple, Any, Optional
 
-from configs import WeatherResource, Config, config
-from async_logging_system import logger, Logger
+from configs import WeatherResource, Config
+from async_logging_system import Logger
 from custom_types import Temperature, WeatherResult
 
 
 class AsyncWeatherChecker:
+    """
+    Asynchronous weather checker, making requests to multiple weather resources (API),
+    processing responses from them and saving information into a result file.
+    """
 
-    def __init__(self):
+    def __init__(self, logger: Logger, config) -> None:
         self.__logger: Logger = logger
         self.__config: Config = config
 
@@ -60,7 +64,7 @@ class AsyncWeatherChecker:
     async def __write_headers_to_file(self) -> None:
         """
         Creates headers for results file (in .csv format) and writes it to a new results file.
-        Headers is a list of sorted weather resources (APIs) names.
+        Headers is a list of sorted weather resources (API) names.
 
         Purpose of sorting headers is to write results in future in the same order as the according weather resource
         name was written.

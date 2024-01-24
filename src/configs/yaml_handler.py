@@ -6,6 +6,9 @@ from .yaml_configs import CustomizedSettings, WeatherResource, YamlConfig
 
 
 class YamlHandler:
+    """
+    A class for working with YAML files, reading data from them and writing data to.
+    """
 
     def __init__(self, yaml_config: YamlConfig) -> None:
         self.__yaml_config: YamlConfig = yaml_config
