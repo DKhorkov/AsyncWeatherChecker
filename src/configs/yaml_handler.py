@@ -13,7 +13,7 @@ class YamlHandler:
     def __init__(self, yaml_config: YamlConfig) -> None:
         self.__yaml_config: YamlConfig = yaml_config
 
-    def read_customized_settings_yaml(self) -> CustomizedSettings:
+    def get_customized_settings(self) -> CustomizedSettings:
         """
         Reads customized settings from .yaml file with according name and return object with parsed data.
 
@@ -25,7 +25,7 @@ class YamlHandler:
 
         return CustomizedSettings(**yaml_data)
 
-    def read_weather_resources_yaml(self) -> List[WeatherResource]:
+    def get_weather_resources(self) -> List[WeatherResource]:
         """
         Reads weather resources from .yaml file with according name and return list of object with parsed data.
 

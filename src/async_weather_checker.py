@@ -25,9 +25,9 @@ class AsyncWeatherChecker:
         Startpoint function, which runs weather checker in event loop of asyncio.
         """
 
-        asyncio.run(self.__check_weather_cycle())
+        asyncio.run(self.__check_weather())
 
-    async def __check_weather_cycle(self) -> None:
+    async def __check_weather(self) -> None:
         """
         Core logics function of Weather Checker.
 
@@ -39,11 +39,11 @@ class AsyncWeatherChecker:
         """
 
         await self.__delete_last_launch_results()
-        await self.__write_headers_to_file()
+        await self.__write_headers_to_results_file()
 
         iter_start_point: int = self.__config.iteration_start_point
         while iter_start_point < self.__config.customized_settings.times_to_check:
-            await self.__check_weather()
+            await self.__poll_weather_resources()
             iter_start_point += self.__config.increment_value
             await asyncio.sleep(self.__config.customized_settings.check_interval_in_seconds)
 
@@ -61,7 +61,7 @@ class AsyncWeatherChecker:
                 exc_info=True
             )
 
-    async def __write_headers_to_file(self) -> None:
+    async def __write_headers_to_results_file(self) -> None:
         """
         Creates headers for results file (in .csv format) and writes it to a new results file.
         Headers is a list of sorted weather resources (API) names.
@@ -81,23 +81,24 @@ class AsyncWeatherChecker:
             headers += self.__config.base_headers
             await file.write(self.__config.sep.join(headers) + self.__config.new_line_arg)
 
-    async def __check_weather(self) -> None:
+    async def __poll_weather_resources(self) -> None:
         """
-        Creates asynchronous task for each weather resource (API) and awaits until every task will be
-        completed (gathered) to work with results.
-
+        Poll each weather resource (API) for weather.
         Received results will be sorted and written to the results file in .csv format.
         """
 
         tasks: List = []
         for weather_resource in self.__config.weather_resources:
-            tasks.append(asyncio.create_task(self.__make_weather_request(weather_resource=weather_resource)))
+            task: asyncio.Task = asyncio.create_task(
+                coro=self.__make_request_to_weather_resource(weather_resource=weather_resource)
+            )
+            tasks.append(task)
 
         weather_results: Tuple[WeatherResult] = await asyncio.gather(*tasks)
         sorted_weather_results: List[WeatherResult] = await self.__sort_weather_results(weather_results=weather_results)
-        await self.__write_weather_results_to_file(weather_results=sorted_weather_results)
+        await self.__write_results_to_file(weather_results=sorted_weather_results)
 
-    async def __make_weather_request(self, weather_resource: WeatherResource) -> WeatherResult:
+    async def __make_request_to_weather_resource(self, weather_resource: WeatherResource) -> WeatherResult:
         """
         Trys to receive weather from the resource (API) according params, provided by user in
         corresponding config file.
@@ -128,7 +129,7 @@ class AsyncWeatherChecker:
             )
 
         finally:
-            temperature: Temperature = await self.__get_weather_from_response(
+            temperature: Temperature = await self.__get_result_from_response(
                 response_json=response_json,
                 result_keys=weather_resource.result_keys
             )
@@ -159,7 +160,7 @@ class AsyncWeatherChecker:
 
         return sorted_weather_results
 
-    async def __get_weather_from_response(
+    async def __get_result_from_response(
             self,
             response_json: Optional[Dict],
             result_keys: List[AnyStr]
@@ -186,7 +187,7 @@ class AsyncWeatherChecker:
 
         return Temperature(result) if result else Temperature(self.__config.default_temperature)
 
-    async def __write_weather_results_to_file(self, weather_results: List[WeatherResult]) -> None:
+    async def __write_results_to_file(self, weather_results: List[WeatherResult]) -> None:
         """
         Processes list of :py:class:`WeatherResult` to list of :py:class:`Temperature`,
         awaits calculating average temperature and comprehenses it with the list of temperatures,
@@ -200,14 +201,14 @@ class AsyncWeatherChecker:
 
         temperatures: List[Temperature] = [list(weather_result.values())[0] for weather_result in weather_results]
         average_temperature: Temperature = await self.__calculate_average_temperature(temperatures=temperatures)
-        temperatures_to_write: List[str] = [str(temperature) for temperature in temperatures + [average_temperature]]
+        full_weather_results: List[str] = [str(temperature) for temperature in temperatures + [average_temperature]]
 
         async with aiofiles.open(
             file=self.__config.results_file_path,
             mode=self.__config.results_file_mode
         ) as file:
 
-            await file.write(self.__config.sep.join(temperatures_to_write) + self.__config.new_line_arg)
+            await file.write(self.__config.sep.join(full_weather_results) + self.__config.new_line_arg)
 
     async def __calculate_average_temperature(self, temperatures: List[Temperature]) -> Temperature:
         """

@@ -10,12 +10,20 @@ class MockData:
     """
 
     def __init__(self) -> None:
+        self.__create_mocked_customized_settings()
+        self.__create_mocked_weather_resources()
+
+    def __create_mocked_customized_settings(self) -> None:
         self.__customized_settings = CustomizedSettings(
             times_to_check=mock_data_config.times_to_check_weather,
             check_interval_in_seconds=mock_data_config.check_weather_interval_in_seconds
         )
 
-        # Params below should be equal to provided in "tests/configs/yaml_configs/weather_resources.yaml" file:
+    def __create_mocked_weather_resources(self) -> None:
+        """
+        Params below should be equal to provided in "tests/configs/yaml_configs/weather_resources.yaml" file.
+        """
+
         self.__weather_resources = [
             WeatherResource(
                 name='OpenMeteo',
