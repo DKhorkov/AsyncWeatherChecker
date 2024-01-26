@@ -1,7 +1,7 @@
 from typing import List
 
 from src.configs.config import WeatherResource, CustomizedSettings
-from .config import mock_data_config
+from .test_config import mock_data_config
 
 
 class MockData:
@@ -21,7 +21,7 @@ class MockData:
 
     def __create_mocked_weather_resources(self) -> None:
         """
-        Params below should be equal to provided in "tests/configs/yaml_configs/weather_resources.yaml" file.
+        Params below should be equal to provided in "tests/test_configs/test_yaml_configs/weather_resources.yaml" file.
         """
 
         self.__weather_resources = [
