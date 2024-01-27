@@ -3,3 +3,5 @@ __pycache__/
 .idea/
 src/configs/yaml_configs/weather_resources.yaml
 weather_results.csv
+.coverage
+htmlcov/

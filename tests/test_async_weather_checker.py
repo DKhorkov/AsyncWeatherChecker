@@ -38,4 +38,3 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
     async def __create_test_results_file() -> None:
         async with aiofiles.open(test_config.results_file_path, test_config.results_file_mode) as file:
             await file.write('')
-

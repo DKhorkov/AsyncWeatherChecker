@@ -54,12 +54,8 @@ class AsyncWeatherChecker:
 
         try:
             os.remove(self.__config.results_file_path)
-        except FileNotFoundError as e:
-            await self.__logger.error(
-                msg=f'Could not delete last session results file.\n'
-                    f'Error: {e}',
-                exc_info=True
-            )
+        except FileNotFoundError:
+            pass
 
     async def __write_headers_to_results_file(self) -> None:
         """
