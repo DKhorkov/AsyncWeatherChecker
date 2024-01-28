@@ -1,4 +1,4 @@
-from typing import List, Literal, AnyStr, LiteralString
+from typing import List, Literal, AnyStr
 from pydantic import BaseModel
 from pathlib import Path
 
@@ -12,7 +12,9 @@ class Config(BaseModel):
     sep: AnyStr = ','
     results_file_path: Path = Path('./weather_results.csv')
     results_file_mode: Literal['a', 'w+', 'a+'] = 'a+'
-    default_temperature: float = 0.0
+    default_temperature_value: None = None
+    default_average_temperature_value: float = 0.0
+    temperature_decimal_places: int = 2
     base_headers: List[AnyStr] = ['Average']
     new_line_arg: str = '\n'
     increment_value: int = 1

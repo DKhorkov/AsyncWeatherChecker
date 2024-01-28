@@ -173,15 +173,16 @@ class AsyncWeatherChecker:
         :return: :py:class:`Temperature`
         """
 
+        temperature_value: Any = self.__config.default_temperature_value
+
         if not response_json:
-            return Temperature(self.__config.default_temperature)
+            return Temperature(temperature_value)
 
-        result = None
         for key in result_keys:
-            weather_info: Dict = result if result else response_json
-            result: Any = weather_info.get(key, None)
+            weather_info: Dict = temperature_value if temperature_value else response_json
+            temperature_value = weather_info.get(key, None)
 
-        return Temperature(result) if result else Temperature(self.__config.default_temperature)
+        return Temperature(temperature_value)
 
     async def __write_results_to_file(self, weather_results: List[WeatherResult]) -> None:
         """
@@ -214,16 +215,17 @@ class AsyncWeatherChecker:
         :return: :py:class:`Temperature`
         """
 
-        temperature_sum: float = 0
+        temperature_sum: float = self.__config.default_average_temperature_value
         results_counter: int = self.__config.default_counter_value
+        default_temperature: Temperature = Temperature(self.__config.default_temperature_value)
         for temperature in temperatures:
-            if temperature != self.__config.default_temperature:
+            if temperature != default_temperature:
                 temperature_sum += temperature
                 results_counter += self.__config.increment_value
 
-        # Avoiding ZeroDivisionError:
         if results_counter == self.__config.default_counter_value:
-            results_counter = self.__config.increment_value
+            return Temperature(self.__config.default_average_temperature_value)
 
         average_temperature: float = temperature_sum / results_counter
-        return Temperature(average_temperature)
+        rounded_average_temperature: float = round(average_temperature, ndigits=self.__config.temperature_decimal_places)
+        return Temperature(rounded_average_temperature)
