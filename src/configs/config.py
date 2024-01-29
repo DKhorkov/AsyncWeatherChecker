@@ -11,7 +11,8 @@ class Config(BaseModel):
     iteration_start_point: int = 0
     sep: AnyStr = ','
     results_file_path: Path = Path('./weather_results.csv')
-    results_file_mode: Literal['a', 'w+', 'a+'] = 'a+'
+    results_file_writing_mode: Literal['a', 'w+', 'a+'] = 'a+'
+    results_file_reading_mode: Literal['r', 'r+'] = 'r'
     default_temperature_value: None = None
     default_average_temperature_value: float = 0.0
     temperature_decimal_places: int = 2

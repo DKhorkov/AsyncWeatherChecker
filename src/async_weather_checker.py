@@ -68,7 +68,7 @@ class AsyncWeatherChecker:
 
         async with aiofiles.open(
             file=self.__config.results_file_path,
-            mode=self.__config.results_file_mode
+            mode=self.__config.results_file_writing_mode
         ) as file:
 
             headers: List[str] = sorted(
@@ -202,7 +202,7 @@ class AsyncWeatherChecker:
 
         async with aiofiles.open(
             file=self.__config.results_file_path,
-            mode=self.__config.results_file_mode
+            mode=self.__config.results_file_writing_mode
         ) as file:
 
             await file.write(self.__config.sep.join(full_weather_results) + self.__config.new_line_arg)

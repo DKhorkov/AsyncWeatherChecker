@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, AnyStr
 
 from src import WeatherResource, CustomizedSettings, Temperature, WeatherResult
 from .test_config import mock_data_config, test_config
@@ -20,6 +20,8 @@ class MockData:
         self.__average_temperature: Temperature = Temperature(mock_data_config.average_temperature_value)
         self.__default_average_temperature: Temperature = Temperature(test_config.default_average_temperature_value)
         self.__broken_temperature: Temperature = Temperature(None)
+
+        self.__create_result_file_headers()
 
     def __create_mocked_customized_settings(self) -> None:
         self.__customized_settings = CustomizedSettings(
@@ -88,6 +90,17 @@ class MockData:
             temperature: Temperature = Temperature(rounded_value)
             self.__list_of_temperatures.append(temperature)
 
+    def __create_result_file_headers(self) -> None:
+        """
+        Creates mocked headers for weather results file.
+
+        weather_resources_names should be a list of all weather resources names provided
+        in "tests/test_configs/test_yaml_configs/weather_resources.yaml" file.
+        """
+        weather_resources_names: List[AnyStr] = ['OpenMeteo']
+        headers: AnyStr = test_config.sep.join(weather_resources_names + test_config.base_headers)
+        self.__result_file_headers: AnyStr = headers + test_config.new_line_arg
+
     @property
     def weather_resources(self) -> List[WeatherResource]:
         return self.__weather_resources
@@ -120,3 +133,6 @@ class MockData:
     def default_average_temperature(self) -> Temperature:
         return self.__default_average_temperature
 
+    @property
+    def result_file_headers(self) -> AnyStr:
+        return self.__result_file_headers

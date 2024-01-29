@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import List
+from pathlib import Path
 
 from src import Config, YamlHandler
 from .test_yaml_configs import test_yaml_config
@@ -7,7 +8,8 @@ from .test_yaml_configs import test_yaml_config
 
 test_config: Config = Config(
     customized_settings=YamlHandler(yaml_config=test_yaml_config).get_customized_settings(),
-    weather_resources=YamlHandler(yaml_config=test_yaml_config).get_weather_resources()
+    weather_resources=YamlHandler(yaml_config=test_yaml_config).get_weather_resources(),
+    results_file_path=Path('./test_weather_results.csv')
 )
 
 
