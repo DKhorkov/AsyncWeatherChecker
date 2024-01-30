@@ -25,6 +25,7 @@ class MockDataConfig(BaseModel):
     broken_check_weather_interval_in_seconds: int = 10
 
     temperature_values: List[float] = [-5.214, 3.9432, 1.0, -2.43]
+    temperature_from_response: float = 15.00
 
     # Equal to average number from temperature_values, rounded to decimal places,
     # equal to test_config.temperature_decimal_places:

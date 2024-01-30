@@ -17,7 +17,7 @@ class Config(BaseModel):
     default_average_temperature_value: float = 0.0
     temperature_decimal_places: int = 2
     base_headers: List[AnyStr] = ['Average']
-    new_line_arg: str = '\n'
+    new_line_arg: AnyStr = '\n'
     increment_value: int = 1
     default_counter_value: int = 0
 

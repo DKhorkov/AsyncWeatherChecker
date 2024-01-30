@@ -99,3 +99,58 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
             results_file_data: AnyStr = await file.read()
 
         return results_file_data
+
+    async def test_get_result_from_response(self) -> None:
+        """
+        Checks, that necessary information will be correctly retrieved from mocked weather API response,
+        using provided result keys for retrieving data from the response.
+        """
+
+        result: Temperature = await self.async_weather_checker._AsyncWeatherChecker__get_result_from_response(
+            response_json=self.mock_data.response_json,
+            result_keys=self.mock_data.result_keys
+        )
+
+        error_message: AnyStr = f'{result} != {self.mock_data.temperature_from_response}!'
+        assert result == self.mock_data.temperature_from_response, error_message
+
+    async def test_get_result_from_empty_response(self) -> None:
+        """
+        Checks, that default information will be received, if empty weather API response will be provided.
+        """
+
+        result: Temperature = await self.async_weather_checker._AsyncWeatherChecker__get_result_from_response(
+            response_json=dict(),
+            result_keys=self.mock_data.result_keys
+        )
+
+        error_message: AnyStr = f'{result} != {test_config.default_temperature_value}!'
+        assert result == test_config.default_temperature_value, error_message
+
+    async def test_get_result_from_response_with_empty_result_keys(self) -> None:
+        """
+        Checks, that default information will be received, if mocked weather API response and
+        empty list of result keys will be provided.
+        """
+
+        result: Temperature = await self.async_weather_checker._AsyncWeatherChecker__get_result_from_response(
+            response_json=self.mock_data.response_json,
+            result_keys=[]
+        )
+
+        error_message: AnyStr = f'{result} != {test_config.default_temperature_value}!'
+        assert result == test_config.default_temperature_value, error_message
+
+    async def test_get_result_from_empty_response_and_result_keys(self) -> None:
+        """
+        Checks, that default information will be received, if empty weather API response and
+        empty list of result keys will be provided.
+        """
+
+        result: Temperature = await self.async_weather_checker._AsyncWeatherChecker__get_result_from_response(
+            response_json=dict(),
+            result_keys=[]
+        )
+
+        error_message: AnyStr = f'{result} != {test_config.default_temperature_value}!'
+        assert result == test_config.default_temperature_value, error_message

@@ -3,7 +3,7 @@ import aiofiles
 import aiohttp
 import os
 
-from typing import List, Dict, AnyStr, Tuple, Any, Optional
+from typing import List, Dict, AnyStr, Tuple, Any, Optional, Union
 
 from configs import WeatherResource, Config
 from async_logging_system import Logger
@@ -107,6 +107,8 @@ class AsyncWeatherChecker:
         which was provided by the resource.
         """
 
+        response_json: Optional[Dict] = None
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.get(
@@ -179,7 +181,7 @@ class AsyncWeatherChecker:
             return Temperature(temperature_value)
 
         for key in result_keys:
-            weather_info: Dict = temperature_value if temperature_value else response_json
+            weather_info: Union[Dict | float | int] = temperature_value if temperature_value else response_json
             temperature_value = weather_info.get(key, None)
 
         return Temperature(temperature_value)
