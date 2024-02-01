@@ -41,10 +41,10 @@ class AsyncWeatherChecker:
         await self.__delete_last_launch_results()
         await self.__write_headers_to_results_file()
 
-        iter_start_point: int = self.__config.iteration_start_point
-        while iter_start_point < self.__config.customized_settings.times_to_check:
+        iterations_number: int = self.__config.iteration_start_point
+        while iterations_number < self.__config.customized_settings.times_to_check:
             await self.__poll_weather_resources()
-            iter_start_point += self.__config.increment_value
+            iterations_number += self.__config.increment_value
             await asyncio.sleep(self.__config.customized_settings.check_interval_in_seconds)
 
     async def __delete_last_launch_results(self) -> None:
@@ -200,7 +200,7 @@ class AsyncWeatherChecker:
 
         temperatures: List[Temperature] = [list(weather_result.values())[0] for weather_result in weather_results]
         average_temperature: Temperature = await self.__calculate_average_temperature(temperatures=temperatures)
-        full_weather_results: List[str] = [str(temperature) for temperature in temperatures + [average_temperature]]
+        full_weather_results: List[AnyStr] = [str(temperature) for temperature in temperatures + [average_temperature]]
 
         async with aiofiles.open(
             file=self.__config.results_file_path,

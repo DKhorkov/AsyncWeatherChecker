@@ -1,4 +1,7 @@
+import random
+
 from typing import List, AnyStr, Dict, Any
+from copy import deepcopy
 
 from src import WeatherResource, CustomizedSettings, Temperature, WeatherResult
 from .test_config import mock_data_config, test_config
@@ -24,10 +27,14 @@ class MockData:
         self.__broken_temperature: Temperature = Temperature(None)
         self.__temperature_from_response: Temperature = Temperature(mock_data_config.temperature_from_response)
 
-        self.__create_result_file_headers()
-
         self.__create_response_json()
         self.__result_keys: List[AnyStr] = self.__broken_weather_resource.result_keys
+
+        self.__create_sorted_weather_results()
+        self.__create_shuffled_weather_results()
+
+        self.__create_result_file_headers()
+        self.__create_result_file_values_line()
 
     def __create_mocked_customized_settings(self) -> None:
         self.__customized_settings = CustomizedSettings(
@@ -98,18 +105,6 @@ class MockData:
             temperature: Temperature = Temperature(rounded_value)
             self.__list_of_temperatures.append(temperature)
 
-    def __create_result_file_headers(self) -> None:
-        """
-        Creates mocked headers for weather results file.
-
-        weather_resources_names should be a list of all weather resources names provided
-        in "tests/test_configs/test_yaml_configs/weather_resources.yaml" file.
-        """
-
-        weather_resources_names: List[AnyStr] = [weather_resource.name for weather_resource in self.__weather_resources]
-        headers: AnyStr = test_config.sep.join(weather_resources_names + test_config.base_headers)
-        self.__result_file_headers: AnyStr = headers + test_config.new_line_arg
-
     def __create_response_json(self) -> None:
         """
         Creates mocked response in JSON format with data, which will be gotten from it with @self.__result_keys.
@@ -134,6 +129,58 @@ class MockData:
                 }
             }
         }
+
+    def __create_sorted_weather_results(self) -> None:
+        """
+        Creates mocked weather results for testing their sorting later.
+        """
+
+        self.__weather_results: List[WeatherResult] = []
+        for index, weather_resource_name in enumerate(mock_data_config.weather_resources_names):
+            self.__weather_results.append(
+                WeatherResult(
+                    {
+                        weather_resource_name: Temperature(mock_data_config.temperature_values[index])
+                    }
+                )
+            )
+
+    def __create_shuffled_weather_results(self) -> None:
+        """
+        Creates shuffled weather results for testing their sorting and comparing to sorted weather results,
+        which were shuffled.
+        """
+
+        self.__shuffled_weather_results: List[WeatherResult] = deepcopy(self.__weather_results)
+        random.shuffle(self.__shuffled_weather_results)
+
+    def __create_result_file_headers(self) -> None:
+        """
+        Creates mocked headers for weather results file.
+
+        weather_resources_names should be a list of all weather resources names provided
+        in "tests/test_configs/test_yaml_configs/weather_resources.yaml" file.
+        """
+
+        weather_resources_names: List[AnyStr] = [weather_resource.name for weather_resource in self.__weather_resources]
+        headers: AnyStr = test_config.sep.join(weather_resources_names + test_config.base_headers)
+        self.__result_file_headers: AnyStr = headers + test_config.new_line_arg
+
+    def __create_result_file_values_line(self) -> None:
+        """
+        Creates mocked values to compare with written to results file during tests.
+        """
+
+        weather_results_values: List[Temperature] = [
+            list(weather_result.values())[0] for weather_result in self.__weather_results
+        ]
+
+        weather_results_values.append(mock_data_config.average_temperature_value)
+
+        str_weather_results_values: List[AnyStr] = list(map(str, weather_results_values))
+        self.__result_file_values_line: AnyStr = (
+                test_config.sep.join(str_weather_results_values) + test_config.new_line_arg
+        )
 
     @property
     def weather_resources(self) -> List[WeatherResource]:
@@ -176,10 +223,6 @@ class MockData:
         return self.__default_average_temperature
 
     @property
-    def result_file_headers(self) -> AnyStr:
-        return self.__result_file_headers
-
-    @property
     def temperature_from_response(self) -> Temperature:
         return self.__temperature_from_response
 
@@ -190,3 +233,19 @@ class MockData:
     @property
     def result_keys(self) -> List[AnyStr]:
         return self.__result_keys
+
+    @property
+    def weather_results(self) -> List[WeatherResult]:
+        return self.__weather_results
+
+    @property
+    def shuffled_weather_results(self) -> List[WeatherResult]:
+        return self.__shuffled_weather_results
+
+    @property
+    def result_file_headers(self) -> AnyStr:
+        return self.__result_file_headers
+
+    @property
+    def result_file_values_line(self) -> AnyStr:
+        return self.__result_file_values_line

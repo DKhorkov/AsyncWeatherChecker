@@ -1,9 +1,9 @@
 import aiofiles
 
 from pathlib import Path
-from typing import AnyStr
+from typing import AnyStr, List
 
-from src import AsyncWeatherChecker, logger, Temperature
+from src import AsyncWeatherChecker, logger, Temperature, WeatherResult
 from .async_metaclass import AsyncMetaclass
 from .test_configs import test_config, MockData
 
@@ -33,6 +33,16 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
         await self.__create_test_results_file()
         assert Path(test_config.results_file_path).exists()
 
+        await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()
+        error_message: AnyStr = f'{Path(test_config.results_file_path)} path still exists!'
+        assert not Path(test_config.results_file_path).exists(), error_message
+
+    async def test_delete_last_launch_results_with_no_existing_file(self) -> None:
+        """
+        Trys to delete the results file, which doesn't exist.
+        """
+
+        assert not Path(test_config.results_file_path).exists()
         await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()
         error_message: AnyStr = f'{Path(test_config.results_file_path)} path still exists!'
         assert not Path(test_config.results_file_path).exists(), error_message
@@ -154,3 +164,30 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
 
         error_message: AnyStr = f'{result} != {test_config.default_temperature_value}!'
         assert result == test_config.default_temperature_value, error_message
+
+    async def test_sort_weather_results(self) -> None:
+        """
+        Checks that sorting weather results working correct.
+        """
+
+        sorted_weather_results: List[WeatherResult] = await self.async_weather_checker._AsyncWeatherChecker__sort_weather_results(
+            weather_results=self.mock_data.shuffled_weather_results
+        )
+
+        error_message: AnyStr = f'{sorted_weather_results} != {self.mock_data.weather_results}!'
+        assert sorted_weather_results == self.mock_data.weather_results, error_message
+
+    async def test_write_results_to_file(self) -> None:
+        """
+        Checks that writing weather results for results file working correct.
+        """
+
+        await self.async_weather_checker._AsyncWeatherChecker__write_results_to_file(
+            weather_results=self.mock_data.weather_results
+        )
+
+        results_file_data: AnyStr = await self.__read_test_results_file()
+        error_message: AnyStr = f'{results_file_data} != {self.mock_data.result_file_values_line}!'
+        assert results_file_data == self.mock_data.result_file_values_line, error_message
+
+        await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, AnyStr
 from pathlib import Path
 
 from src import Config, YamlHandler
@@ -16,8 +16,8 @@ test_config: Config = Config(
 class MockDataConfig(BaseModel):
     # Params below should be equal to provided in
     # "tests/test_configs/test_yaml_configs/customized_setting.yaml" file:
-    times_to_check_weather: int = 1
-    check_weather_interval_in_seconds: int = 0
+    times_to_check_weather: int = 2
+    check_weather_interval_in_seconds: int = 5
 
     # Params below should NOT be equal to provided in
     # "tests/test_configs/test_yaml_configs/customized_setting.yaml" file:
@@ -30,6 +30,14 @@ class MockDataConfig(BaseModel):
     # Equal to average number from temperature_values, rounded to decimal places,
     # equal to test_config.temperature_decimal_places:
     average_temperature_value: float = -0.68
+
+    # Should be sorted and length equal to length of @temperature_values:
+    weather_resources_names: List[AnyStr] = [
+        'AppForWeather',
+        'OpenMeteo',
+        'SomeAPI',
+        'YandexWeather',
+    ]
 
 
 mock_data_config: MockDataConfig = MockDataConfig()
