@@ -180,6 +180,8 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
     async def test_write_results_to_file(self) -> None:
         """
         Checks that writing weather results for results file working correct.
+
+        After checking deletes created during test results file.
         """
 
         await self.async_weather_checker._AsyncWeatherChecker__write_results_to_file(
@@ -191,3 +193,43 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
         assert results_file_data == self.mock_data.result_file_values_line, error_message
 
         await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()
+
+    async def test_make_request_to_weather_resource(self) -> None:
+        """
+        Makes request to the existing weather resource and checks that the weather result is not equal
+        to default temperature.
+
+        Also checks that weather resource name is correct in weather result.
+        """
+
+        weather_result: WeatherResult = await self.async_weather_checker._AsyncWeatherChecker__make_request_to_weather_resource(
+            weather_resource=self.mock_data.weather_resource
+        )
+
+        weather_resource_name: AnyStr = list(weather_result.keys())[0]
+        error_message: AnyStr = f'{weather_resource_name} != {self.mock_data.weather_resource.name}!'
+        assert weather_resource_name == self.mock_data.weather_resource.name, error_message
+
+        temperature: Temperature = weather_result[weather_resource_name]
+        error_message: AnyStr = f'{temperature} == {self.mock_data.broken_temperature}!'
+        assert temperature != self.mock_data.broken_temperature, error_message
+
+    async def test_make_request_to_broken_weather_resource(self) -> None:
+        """
+        Makes request to non-existing weather resource and checks that the weather result is equal
+        to default temperature.
+
+        Also checks that weather resource name is correct in weather result.
+        """
+
+        weather_result: WeatherResult = await self.async_weather_checker._AsyncWeatherChecker__make_request_to_weather_resource(
+            weather_resource=self.mock_data.broken_weather_resource
+        )
+
+        weather_resource_name: AnyStr = list(weather_result.keys())[0]
+        error_message: AnyStr = f'{weather_resource_name} != {self.mock_data.broken_weather_resource.name}!'
+        assert weather_resource_name == self.mock_data.broken_weather_resource.name, error_message
+
+        temperature: Temperature = weather_result[weather_resource_name]
+        error_message: AnyStr = f'{temperature} != {self.mock_data.broken_temperature}!'
+        assert temperature == self.mock_data.broken_temperature, error_message

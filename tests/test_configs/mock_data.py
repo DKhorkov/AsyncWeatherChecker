@@ -24,7 +24,7 @@ class MockData:
         self.__create_list_of_temperatures()
         self.__average_temperature: Temperature = Temperature(mock_data_config.average_temperature_value)
         self.__default_average_temperature: Temperature = Temperature(test_config.default_average_temperature_value)
-        self.__broken_temperature: Temperature = Temperature(None)
+        self.__broken_temperature: Temperature = Temperature(test_config.default_temperature_value)
         self.__temperature_from_response: Temperature = Temperature(mock_data_config.temperature_from_response)
 
         self.__create_response_json()
