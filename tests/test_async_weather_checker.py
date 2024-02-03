@@ -233,3 +233,27 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
         temperature: Temperature = weather_result[weather_resource_name]
         error_message: AnyStr = f'{temperature} != {self.mock_data.broken_temperature}!'
         assert temperature == self.mock_data.broken_temperature, error_message
+
+    async def test_poll_weather_resources(self) -> None:
+        """
+        Checks that method, which makes requests to all provided weather resources and aggregates
+        already tested methods above, works correctly and written results are not broken.
+
+        After checking deletes created during test results file.
+        """
+
+        await self.async_weather_checker._AsyncWeatherChecker__poll_weather_resources()
+
+        results_file_data: AnyStr = await self.__read_test_results_file()
+        weather_result_value, average_temperature_value = results_file_data.split(test_config.sep)
+        weather_result_temperature: Temperature = Temperature(weather_result_value)
+        average_temperature_value.rstrip(test_config.new_line_arg)
+        average_temperature: Temperature = Temperature(average_temperature_value)
+
+        error_message: AnyStr = f'{weather_result_temperature} == {self.mock_data.broken_temperature}!'
+        assert weather_result_temperature != self.mock_data.broken_temperature, error_message
+
+        error_message: AnyStr = f'{average_temperature} == {self.mock_data.default_average_temperature}!'
+        assert average_temperature != self.mock_data.default_average_temperature, error_message
+
+        await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()
