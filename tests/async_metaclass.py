@@ -34,6 +34,7 @@ class AsyncMetaclass(type):
         :param bases: Parents, from which class was inherited
         :param cls_attrs: Class attributes and methods
         """
+
         new_cls_attrs = dict()
         for attr_name, attr_value in cls_attrs.items():
             if callable(attr_value) and not isinstance(attr_value, staticmethod):

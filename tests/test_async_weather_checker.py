@@ -49,8 +49,8 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
 
     @staticmethod
     async def __create_test_results_file() -> None:
-        async with aiofiles.open(test_config.results_file_path, test_config.results_file_writing_mode) as file:
-            await file.write('')
+        async with aiofiles.open(test_config.results_file_path, test_config.results_file_writing_mode) as results_file:
+            await results_file.write('')
 
     async def test_calculate_average_temperature(self) -> None:
         """
@@ -105,8 +105,8 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
 
     @staticmethod
     async def __read_test_results_file() -> AnyStr:
-        async with aiofiles.open(test_config.results_file_path, test_config.results_file_reading_mode) as file:
-            results_file_data: AnyStr = await file.read()
+        async with aiofiles.open(test_config.results_file_path, test_config.results_file_reading_mode) as results_file:
+            results_file_data: AnyStr = await results_file.read()
 
         return results_file_data
 
@@ -244,16 +244,53 @@ class TestAsyncWeatherChecker(metaclass=AsyncMetaclass):
 
         await self.async_weather_checker._AsyncWeatherChecker__poll_weather_resources()
 
-        results_file_data: AnyStr = await self.__read_test_results_file()
-        weather_result_value, average_temperature_value = results_file_data.split(test_config.sep)
+        results_line: AnyStr = await self.__read_test_results_file()
+        await self.__check_results_line(results_line=results_line, mock_data=self.mock_data)
+
+        await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()
+
+    @staticmethod
+    async def __check_results_line(results_line: AnyStr, mock_data: MockData) -> None:
+        """
+        Checks, that results file line with temperature and average temperature is not equal to default values
+        due to making requests to existing weather resource.
+
+        Method is static for purpose of correct work of Async Metaclass.
+
+        :param results_line: string from results file with temperatures from weather resources.
+        :param mock_data: mocked data for comparing with received data from previous tested methods.
+        """
+
+        weather_result_value, average_temperature_value = results_line.split(test_config.sep)
         weather_result_temperature: Temperature = Temperature(weather_result_value)
         average_temperature_value.rstrip(test_config.new_line_arg)
         average_temperature: Temperature = Temperature(average_temperature_value)
 
-        error_message: AnyStr = f'{weather_result_temperature} == {self.mock_data.broken_temperature}!'
-        assert weather_result_temperature != self.mock_data.broken_temperature, error_message
+        error_message: AnyStr = f'{weather_result_temperature} == {mock_data.broken_temperature}!'
+        assert weather_result_temperature != mock_data.broken_temperature, error_message
 
-        error_message: AnyStr = f'{average_temperature} == {self.mock_data.default_average_temperature}!'
-        assert average_temperature != self.mock_data.default_average_temperature, error_message
+        error_message: AnyStr = f'{average_temperature} == {mock_data.default_average_temperature}!'
+        assert average_temperature != mock_data.default_average_temperature, error_message
+
+    async def test_check_weather(self) -> None:
+        """
+        Checks, that weather results will be gotten from weather resources for a number of times,
+        provided in customized settings.
+
+        For every weather results line checks that temperature and average temperature is not equal to default values.
+
+        After checking deletes created during test results file.
+        """
+
+        await self.async_weather_checker._AsyncWeatherChecker__check_weather()
+
+        async with aiofiles.open(test_config.results_file_path, test_config.results_file_reading_mode) as results_file:
+            headers_line_index: int = 0
+
+            for line_index, line in enumerate(await results_file.readlines()):
+                if line_index == headers_line_index:
+                    assert line == self.mock_data.result_file_headers
+                else:
+                    await self.__check_results_line(results_line=line, mock_data=self.mock_data)
 
         await self.async_weather_checker._AsyncWeatherChecker__delete_last_launch_results()

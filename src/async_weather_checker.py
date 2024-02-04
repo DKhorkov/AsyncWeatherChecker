@@ -12,7 +12,7 @@ from custom_types import Temperature, WeatherResult
 
 class AsyncWeatherChecker:
     """
-    Asynchronous weather checker, making requests to multiple weather resources (API),
+    Asynchronous weather checker, which makes requests to multiple weather resources (API),
     processing responses from them and saving information into a result file.
     """
 
