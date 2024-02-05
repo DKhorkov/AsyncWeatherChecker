@@ -14,15 +14,15 @@ coverage_data=./htmlcov/
 last_launch_results=weather_results.csv
 
 if [ -f $coverage_raw ]; then
-  (rm -v $coverage_raw)
+  (sudo rm -v $coverage_raw)
 fi
 
 if [ -d $coverage_data ]; then
-  (rm -rfv $coverage_data)
+  (sudo rm -rfv $coverage_data)
 fi
 
 if [ -f $last_launch_results ]; then
-  (rm -v $last_launch_results)
+  (sudo rm -v $last_launch_results)
 fi
 
 echo

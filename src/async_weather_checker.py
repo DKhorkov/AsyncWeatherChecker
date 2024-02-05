@@ -45,7 +45,9 @@ class AsyncWeatherChecker:
         while iterations_number < self.__config.customized_settings.times_to_check:
             await self.__poll_weather_resources()
             iterations_number += self.__config.increment_value
-            await asyncio.sleep(self.__config.customized_settings.check_interval_in_seconds)
+            if iterations_number < self.__config.customized_settings.times_to_check:
+                print(f'Sleeping for {self.__config.customized_settings.check_interval_in_seconds} seconds...\n')
+                await asyncio.sleep(self.__config.customized_settings.check_interval_in_seconds)
 
     async def __delete_last_launch_results(self) -> None:
         """
@@ -54,7 +56,7 @@ class AsyncWeatherChecker:
 
         try:
             os.remove(self.__config.results_file_path)
-        except FileNotFoundError:
+        except (FileNotFoundError, OSError):
             pass
 
     async def __write_headers_to_results_file(self) -> None:
@@ -83,6 +85,8 @@ class AsyncWeatherChecker:
         Received results will be sorted and written to the results file in .csv format.
         """
 
+        print('Polling weather resources...')
+
         tasks: List = []
         for weather_resource in self.__config.weather_resources:
             task: asyncio.Task = asyncio.create_task(
@@ -93,6 +97,8 @@ class AsyncWeatherChecker:
         weather_results: Tuple[WeatherResult] = await asyncio.gather(*tasks)
         sorted_weather_results: List[WeatherResult] = await self.__sort_weather_results(weather_results=weather_results)
         await self.__write_results_to_file(weather_results=sorted_weather_results)
+
+        print('Successfully polled weather resources and saved result into file!')
 
     async def __make_request_to_weather_resource(self, weather_resource: WeatherResource) -> WeatherResult:
         """

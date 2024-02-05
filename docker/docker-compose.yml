@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  async_weather_checker:
+    build:
+      context: ../
+      dockerfile: ./docker/Dockerfile
+    volumes:
+      - ../htmlcov:/app/htmlcov
+      - ../weather_results.csv:/app/weather_results.csv
