@@ -43,18 +43,16 @@ call other bash files to:
    3) run tests;
    4) run app, if all tests were successfully passed.
 
-
-    bash start.sh
+<pre>bash start.sh</pre>
 
 2. Using standard python way by installing 
 requirements:
 
-
-    pip install -r requirements.txt
+<pre>pip install -r requirements.txt</pre>
 
 and run main python script:
 
-    python src/main.py
+<pre>python src/main.py</pre>
 
 
 ### Run app via docker:
@@ -67,29 +65,25 @@ which will:
    2) Build docker image and it's environment;
    3) Run app via docker.
 
-
-    make -C docker clean && make -C docker build && make -C docker run
+<pre>make -C docker clean && make -C docker build && make -C docker run</pre>
 
 2. Using docker commands directly:
 
-   
-    cd ./docker && sudo docker-compose build && sudo docker-compose up
+<pre>cd ./docker && sudo docker-compose build && sudo docker-compose up</pre>
 
 Before using docker commands, file with future results
 (<b><i>weather_results.csv</i></b>) should be created
 (also in project's root directory) locally on 
 docker-host for correct binding of docker mount:
-    
 
-    touch weather_results.csv
+<pre>touch weather_results.csv</pre>
 
 ### Run tests:
 
 There are two ways to run tests for current application:<br>
 1. By running created for tests bash file:
 
-
-    bash run_tests.sh
+<pre>bash run_tests.sh</pre>
 
 2. Using <a href="https://docs.pytest.org/en">PyTest</a> 
 to run tests directly.
