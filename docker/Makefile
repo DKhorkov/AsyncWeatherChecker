@@ -18,5 +18,5 @@ run:
 
 clean:
 	sudo rm -rf ../htmlcov/
-	sudo rm ../weather_results.csv -f
-	sudo docker system prune -a --volumes -f
+	sudo rm -f ../weather_results.csv
+	sudo docker system prune -a --volumes

@@ -10,7 +10,7 @@
 # https://google.github.io/styleguide/shellguide.html#s7-naming-conventions
 readonly BASH_ERROR_RETURN_CODE=1
 
-sh configurate.sh
+sh configure.sh
 sh cleenup.sh
 
 # If not all tests were successfully passed and return code from run_tests.sh is equal to
